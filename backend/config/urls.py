@@ -38,19 +38,25 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # swagger
-    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0),
+         name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger',
+         cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc',
+         cache_timeout=0), name='schema-redoc'),
 
     # admin
     path('admin/', admin.site.urls),
 
     # local apps
     path('main/', include('apps.main.urls', namespace='main')),
-    path('tickets/', include('apps.tickets.urls', namespace='tickets'))
+    path('chat/', include('apps.tickets.urls', namespace='tickets'))
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += [path('rest-api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += [path('rest-api-auth/',
+                         include('rest_framework.urls', namespace='rest_framework'))]
