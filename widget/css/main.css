@@ -1,0 +1,131 @@
+.chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: none;
+    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Ubuntu Mono', monospace;
+}
+
+.chat-container.active {
+    display: block;
+    animation: slideUp 0.3s ease;
+}
+
+.chat-window {
+    width: 350px;
+    height: 500px;
+    background: #2d2d2d;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 15px 15px 0 0;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    color: #fff;
+}
+
+.chat-input {
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    gap: 10px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background: #333;
+    color: #fff;
+    font-family: 'Consolas', monospace;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: #0084ff;
+    color: white;
+    cursor: pointer;
+}
+
+.start-chat-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: #0084ff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.close-btn {
+    cursor: pointer;
+    background: #ff4444;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.message-bubble {
+    background: #0084ff;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-break: break-word;
+    position: relative;
+    margin: 5px 0;
+}
+
+.other-message .message-bubble {
+    background: #333;
+}
+
+.message-time {
+    font-size: 0.7em;
+    color: #888;
+    margin-top: 3px;
+    display: block;
+    text-align: right;
+}
+
+.other-message .message-time {
+    text-align: left;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
