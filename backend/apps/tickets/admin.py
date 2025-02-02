@@ -1,12 +1,11 @@
 from django.contrib import admin
-from .models import Platform, UserDetails, Operator, Ticket, Message
+from .models import Platform, UserDetails, Ticket, Message
 
 
 class MessageInline(admin.TabularInline):
     model = Message
     extra = 1
-    fields = ("sender_user", "sender_operator", "message_type",
-              "read_status", "text", "file")
+    fields = ("sender_guest", "sender_operator", "read_status", "text",)
     readonly_fields = ("created_at",)
 
 
@@ -20,14 +19,15 @@ class PlatformAdmin(admin.ModelAdmin):
 
 @admin.register(UserDetails)
 class UserDetailsAdmin(admin.ModelAdmin):
-    list_display = ("user", "location", "telegram_id",
+    list_display = ("first_name", "location", "telegram_id",
                     "platform", "created_at", "updated_at")
-    search_fields = ("user__username", "location", "telegram_id")
+    search_fields = ("location", "telegram_id", "first_name")
     list_filter = ("platform", "created_at")
-    ordering = ("user__username",)
+    ordering = ("-created_at",)
+    readonly_fields = ("location", "status", "created_at", "updated_at")
     fieldsets = (
         (None, {
-            'fields': ('user', 'location', 'telegram_id', 'platform')
+            'fields': ('status', 'first_name', 'last_name', 'username', 'location', 'telegram_id', 'platform')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -36,46 +36,41 @@ class UserDetailsAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Operator)
-class OperatorAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "username", "created_at", "updated_at")
-    search_fields = ("full_name", "username")
-    list_filter = ("created_at",)
-    ordering = ("full_name",)
-
-
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ("subject", "status", "priority", "connect_type",
-                    "user_details", "operator", "created_at", "updated_at")
-    list_filter = ("status", "priority", "connect_type",
-                   "operator", "created_at")
-    search_fields = ("subject", "user_details__user__username",
-                     "operator__full_name")
-    # ordering = ("created_at",)
+    list_display = ("ticket_uuid", "subject", "status", "priority",
+                    "operator", "created_at", "updated_at")
+    list_filter = ("status", "priority", "operator", "created_at")
+    search_fields = ("subject", "ticket_uuid")
+    ordering = ("created_at",)
     inlines = [MessageInline]
+    readonly_fields = ("created_at", "updated_at")
     fieldsets = (
         (None, {
-            'fields': ('subject', 'connect_type', 'user_details', 'operator', 'status', 'priority', 'closed_at')
+            'fields': ('ticket_uuid', 'subject', 'user_details', 'operator', 'status', 'priority', 'closed_at')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("ticket", "sender_user", "sender_operator",
+    list_display = ("ticket", "sender_guest", "sender_operator",
                     "message_type", "read_status", "created_at", "updated_at")
-    list_filter = ("message_type", "read_status", "sender_user",
+    list_filter = ("message_type", "read_status", "sender_guest",
                    "sender_operator", "created_at")
-    search_fields = ("text", "ticket__subject",
-                     "sender_user__user__username", "sender_operator__full_name")
-    ordering = ("created_at",)
+    search_fields = ("text", "ticket__subject",)
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at", "updated_at")
     fieldsets = (
         (None, {
-            'fields': ('ticket', 'sender_user', 'sender_operator', 'message_type', 'text', 'file', 'read_status', 'reply_message')
+            'fields': ('ticket', 'sender_guest', 'sender_operator', 'message_type', 'text', 'file', 'read_status', 'reply_message')
         }),
         ('Timestamps', {
-            'fields': (),
+            'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
