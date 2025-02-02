@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 
 
 class AbstractBaseModel(models.Model):
@@ -17,13 +17,16 @@ class Platform(AbstractBaseModel):
         return self.name
 
 
-class UserDetails(AbstractBaseModel):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name="details"
+class UserDetails(AbstractUser, AbstractBaseModel):
+    STATUS_CHOICES = [
+        ("online", "Online"),
+        ("offline", "Offline"),
+    ]
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="online"
     )
-
     location = models.GenericIPAddressField()
     telegram_id = models.CharField(
         max_length=50,
@@ -38,16 +41,23 @@ class UserDetails(AbstractBaseModel):
         related_name="users",
     )
 
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="user_details_groups",
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="user_details_permissions",
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Guest'
+        verbose_name_plural = 'Guests'
+
     def __str__(self):
-        return self.user.username
-
-
-class Operator(AbstractBaseModel):
-    full_name = models.CharField(max_length=255)
-    username = models.CharField(max_length=150, unique=True)
-
-    def __str__(self):
-        return self.full_name
+        return self.username
 
 
 class Ticket(AbstractBaseModel):
@@ -62,11 +72,10 @@ class Ticket(AbstractBaseModel):
         ("medium", "Medium"),
         ("high", "High"),
     ]
-
-    connect_type = models.ForeignKey(
-        to=Platform,
-        on_delete=models.CASCADE,
-        related_name="tickets"
+    ticket_uuid = models.UUIDField(
+        verbose_name="Ticket UUID",
+        max_length=16,
+        unique=True
     )
     user_details = models.ForeignKey(
         UserDetails,
@@ -74,7 +83,7 @@ class Ticket(AbstractBaseModel):
         related_name="tickets"
     )
     operator = models.ForeignKey(
-        Operator,
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -90,7 +99,11 @@ class Ticket(AbstractBaseModel):
         choices=PRIORITY_CHOICES,
         default="medium"
     )
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
     closed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -104,7 +117,7 @@ class Message(AbstractBaseModel):
         ("document", "Document"),
     ]
 
-    sender_user = models.ForeignKey(
+    sender_guest = models.ForeignKey(
         UserDetails,
         on_delete=models.CASCADE,
         null=True,
@@ -112,7 +125,7 @@ class Message(AbstractBaseModel):
         related_name="sent_messages"
     )
     sender_operator = models.ForeignKey(
-        Operator,
+        User,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
