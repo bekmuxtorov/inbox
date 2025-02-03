@@ -1,23 +1,19 @@
-import asyncpg
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
+from loader import dp, db
 
-from loader import dp, db, bot
-from data.config import ADMINS
+from states.registration import Register
+from keyboards.default import contact_request_button
+from keyboards.inline import send_question_button
 
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
-    try:
-        user = await db.add_user(telegram_id=message.from_user.id,
-                                 full_name=message.from_user.full_name,
-                                 username=message.from_user.username)
-    except asyncpg.exceptions.UniqueViolationError:
-        user = await db.select_user(telegram_id=message.from_user.id)
+    telegram_id = message.from_user.id
+    user = await db.select_user(telegram_id=telegram_id)
+    if not user:
+        await message.answer("☎️Please share your phone number or send it as a example.\n\nExample: +998901644101", reply_markup=contact_request_button)
+        await Register.phone_number.set()
+        return
 
-    await message.answer("Xush kelibsiz!")
-
-    # ADMINGA xabar beramiz
-    count = await db.count_users()
-    msg = f"{user[1]} bazaga qo'shildi.\nBazada {count} ta foydalanuvchi bor."
-    await bot.send_message(chat_id=ADMINS[0], text=msg)
+    await message.answer("👋🏻Hello! If you have a question, click the \"Send question\" button.", reply_markup=send_question_button)
