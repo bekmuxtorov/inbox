@@ -46,7 +46,7 @@ class Database:
         full_name VARCHAR(255) NOT NULL,
         phone_number varchar(255) NULL, 
         username varchar(255) NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
         );
         """
         await self.execute(sql, execute=True)
@@ -92,8 +92,7 @@ class Database:
             "telegram_id": data[0],
             "full_name": data[1],
             "phone_number": data[2],
-            "username": data[3],
-            "created_at": data[4],
+            "username": data[3]
         } if data else None
 
     async def count_users(self):
