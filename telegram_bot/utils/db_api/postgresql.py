@@ -6,6 +6,7 @@ from asyncpg.pool import Pool
 
 from data import config
 
+
 class Database:
 
     def __init__(self):
@@ -41,10 +42,11 @@ class Database:
     async def create_table_users(self):
         sql = """
         CREATE TABLE IF NOT EXISTS Users (
-        id SERIAL PRIMARY KEY,
+        telegram_id BIGINT NOT NULL UNIQUE,
         full_name VARCHAR(255) NOT NULL,
+        phone_number varchar(255) NULL, 
         username varchar(255) NULL,
-        telegram_id BIGINT NOT NULL UNIQUE 
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         );
         """
         await self.execute(sql, execute=True)
@@ -57,18 +59,42 @@ class Database:
         ])
         return sql, tuple(parameters.values())
 
-    async def add_user(self, full_name, username, telegram_id):
-        sql = "INSERT INTO users (full_name, username, telegram_id) VALUES($1, $2, $3) returning *"
-        return await self.execute(sql, full_name, username, telegram_id, fetchrow=True)
+    async def add_user(self, telegram_id, full_name, phone_number, username):
+        sql = "INSERT INTO users (telegram_id, full_name, phone_number, username) VALUES($1, $2, $3, $4) returning *"
+        data = await self.execute(sql, telegram_id, full_name, phone_number, username, fetchrow=True)
+        return {
+            "telegram_id": data[0],
+            "full_name": data[1],
+            "phone_number": data[2],
+            "username": data[3],
+            "created_at": data[4],
+        } if data else None
 
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
-        return await self.execute(sql, fetch=True)
+        data = await self.execute(sql, fetch=True)
+        return [
+            {
+                "telegram_id": item[0],
+                "full_name": item[1],
+                "phone_number": item[2],
+                "username": item[3],
+                "created_at": item[4],
+            }
+            for item in data
+        ] if data else None
 
     async def select_user(self, **kwargs):
         sql = "SELECT * FROM Users WHERE "
         sql, parameters = self.format_args(sql, parameters=kwargs)
-        return await self.execute(sql, *parameters, fetchrow=True)
+        data = await self.execute(sql, *parameters, fetchrow=True)
+        return {
+            "telegram_id": data[0],
+            "full_name": data[1],
+            "phone_number": data[2],
+            "username": data[3],
+            "created_at": data[4],
+        } if data else None
 
     async def count_users(self):
         sql = "SELECT COUNT(*) FROM Users"
