@@ -27,7 +27,7 @@ class UserDetails(AbstractUser, AbstractBaseModel):
         choices=STATUS_CHOICES,
         default="online"
     )
-    location = models.GenericIPAddressField()
+    location = models.GenericIPAddressField(null=True, blank=True)
     telegram_id = models.CharField(
         max_length=50,
         unique=True,
